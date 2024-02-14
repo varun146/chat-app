@@ -1,15 +1,24 @@
+// package imports
 import dotenv from "dotenv";
-dotenv.config();
-import authRoutes from "./routes/auth.routes.js";
 import express from "express";
+
+// files import
+import authRoutes from "./routes/auth.routes.js";
+import connectToMongoDB from "./db/connectToMongoDB.js";
 
 const PORT = process.env.PORT || 5000;
 const app = express();
 
-app.get("/", (req, res) => {
-  res.send("Hello World");
-});
+dotenv.config();
+
+app.use(express.json()); // to parse the incoming requests with JSON payload (from req.body)
 
 app.use("/api/auth", authRoutes);
+// app.get("/", (req, res) => {
+//   res.send("Hello World");
+// });
 
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+app.listen(PORT, async () => {
+  connectToMongoDB();
+  console.log(`Server is running on port ${PORT}`);
+});
