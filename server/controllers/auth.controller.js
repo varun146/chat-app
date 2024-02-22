@@ -15,7 +15,7 @@ export const signupUser = async (req, res) => {
 
     const user = await User.findOne({ username });
     if (user) {
-      return res.send(400).json({ error: "Username already exists" });
+      return res.status(400).json({ error: "Username already exists" });
     }
 
     // hash password here
@@ -66,7 +66,7 @@ export const loginUser = async (req, res) => {
     if (!user || !isPasswordCorrect) {
       return res.status(400).json({ error: "Invalid username or password" });
     }
-    generateTokenAndSetCookie(user._id, res);
+    generateTokenAndSetCookie(user._id, res); // function which generates the token and set a cookie
 
     res.status(201).json({
       _id: user._id,
@@ -79,3 +79,15 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
+export const logout = async (req, res) => {
+  try {
+    res.cookie("jwt_token", "", { maxAge: 0 });
+    res.status(200).json({ message: "Logged out successfully" })
+  } catch (error) {
+    console.log("Error in logout controller", error.message)
+    res.status(500).json({ error: "Internal Server Error" })
+  }
+
+}
