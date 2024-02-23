@@ -9,10 +9,10 @@ import connectToMongoDB from "./db/connectToMongoDB.js";
 import messageRoutes from "./routes/message.routes.js"
 import userRoutes from "./routes/user.routes.js";
 
+dotenv.config()
 const PORT = process.env.PORT || 5000;
 const app = express();
 
-dotenv.config()
 
 
 
