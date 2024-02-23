@@ -6,26 +6,28 @@ import Message from "../models/message.model.js";
 export const sendMessage = async (req, res) => {
   try {
     const { message } = req.body; // getting the actual message from the logged in user
-    const { id: receiverid } = req.params; // getting the receiverId from the params
+    const { id: receiverId } = req.params; // getting the receiverId from the params
+    console.log("I am receiverId: ", receiverId);
     const senderId = req.user._id;  //  getting the user id from the cookies
 
     let conversation = await Conversation.findOne({ // getting a conversation between the two users
       participants: {
-        $all: [senderId, receiverid]
+        $all: [senderId, receiverId]
       }
     })
 
     if (!conversation) { // if there is no conversation, create one
       conversation = await Conversation.create({
-        participants: [senderId, receiverid]
+        participants: [senderId, receiverId]
       })
     }
 
     const newMessage = new Message({
       senderId,
-      receiverId: receiverid,
+      receiverId,
       message,
     })
+    console.log(newMessage)
 
     if (newMessage) {
       conversation.messages.push(newMessage._id)
@@ -33,7 +35,7 @@ export const sendMessage = async (req, res) => {
 
     // socket.io functionality will go here
 
-    await Promise.all[conversation.save(), newMessage.save()]; // this will run in parallel
+    await Promise.all([conversation.save(), newMessage.save()]); // this will run in parallel
 
     res.status(201).json({ newMessage });
   } catch (error) {
@@ -51,7 +53,7 @@ export const getMessages = async (req, res) => {
     const senderId = req.user._id;
     const conversation = await Conversation.findOne({
       participants: { $all: [senderId, userToChatId] }
-    }).populate("message")
+    }).populate("messages")
 
     res.status(200).json(conversation.messages);
 
@@ -60,6 +62,4 @@ export const getMessages = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" })
 
   }
-
-
 }
