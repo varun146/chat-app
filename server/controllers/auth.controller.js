@@ -22,8 +22,8 @@ export const signupUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const boyProfilePic = `https://avatar.iran.liara.run/public/boy/username=${username}`;
-    const girlProfilePic = `https://avatar.iran.liara.run/public/girl/username=${username}`;
+    const boyProfilePic = `https://avatar.iran.liara.run/public/boy?username=${username}`;
+    const girlProfilePic = `https://avatar.iran.liara.run/public/girl?username=${username}`;
 
     const newUser = new User({
       fullName,
@@ -57,6 +57,7 @@ export const signupUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { username, password } = req.body;
+    console.log(username, password);
     const user = await User.findOne({ username });
     const isPasswordCorrect = await bcrypt.compare(
       password,
@@ -80,14 +81,12 @@ export const loginUser = async (req, res) => {
   }
 };
 
-
 export const logout = async (req, res) => {
   try {
     res.cookie("jwt_token", "", { maxAge: 0 });
-    res.status(200).json({ message: "Logged out successfully" })
+    res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
-    console.log("Error in logout controller", error.message)
-    res.status(500).json({ error: "Internal Server Error" })
+    console.log("Error in logout controller", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
   }
-
-}
+};

@@ -1,52 +1,83 @@
-import { toast } from "react-hot-toast"
+import { toast } from "react-hot-toast";
+import { useState } from "react";
+import { useAuthContext } from "../context/AuthContext.jsx";
 
 const useSignup = () => {
   const [loading, setLoading] = useState(false);
+  const { setAuthUser } = useAuthContext();
 
-  const signup = async ({ fullName, username, password, confirmPassword, gender }) => {
-    const success = handleInputErrors({ fullName, username, password, confirmPassword, gender });
+  const signup = async ({
+    fullName,
+    username,
+    password,
+    confirmPassword,
+    gender,
+  }) => {
+    const success = handleInputErrors({
+      fullName,
+      username,
+      password,
+      confirmPassword,
+      gender,
+    });
     if (!success) return;
 
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/auth/signup', {
+      const res = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName, username, password, confirmPassword, gender })
-      })
+        body: JSON.stringify({
+          fullName,
+          username,
+          password,
+          confirmPassword,
+          gender,
+        }),
+      });
 
       const data = await res.json();
-      console.log(data)
+      if (data.error) {
+        throw new Error(data.error);
+      }
 
+      // setting the data in the localStorage
+      localStorage.setItem("chat-user", JSON.stringify(data));
+
+      // setting up the context
+      setAuthUser(data);
     } catch (error) {
-      toast.error(error.message)
+      toast.error(error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-
-
-    return { loading, signup };
-
-  }
-}
+  };
+  return { loading, signup };
+};
 
 export default useSignup;
 
-
-// input fields validation (checks for any kind of )
-function handleInputErrors({ fullName, username, password, confirmPassword, gender }) {
+// input fields validation (checks for any kind of discrepancy )
+function handleInputErrors({
+  fullName,
+  username,
+  password,
+  confirmPassword,
+  gender,
+}) {
   if (!fullName || !username || !password || !confirmPassword || !gender) {
-    toast.error("Please fill all the fields")
+    toast.error("Please fill all the fields");
     return false;
   }
-
   if (password !== confirmPassword) {
-    toast.error("Passwords do not match")
+    toast.error("Passwords do not match");
     return false;
   }
 
   if (password.length < 6) {
-    toast.error("Password must be of at least 6 characters")
+    toast.error("Password must be of at least 6 characters");
     return false;
   }
+
+  return true;
 }
